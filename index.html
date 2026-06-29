@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WashItRight — Advanced Robot Window Cleaner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ RESET & BASE ═══════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Inter',sans-serif;background:#f0f4f8;color:#0d1b2a;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+img{display:block;max-width:100%;object-fit:cover}
+ul{list-style:none}
+button{cursor:pointer;font-family:'Inter',sans-serif;border:none}
+
+/* ═══════════ DESIGN TOKENS ═══════════ */
+:root{
+  --navy:    #0b1f3a;   /* Primary deep navy */
+  --navy2:   #0d2748;
+  --navy3:   #122f56;
+  --cyan:    #00c2e0;   /* Accent electric cyan */
+  --cyan2:   #00a8c6;
+  --cyan-glow:rgba(0,194,224,.18);
+  --white:   #ffffff;
+  --offwhite:#f0f6fa;
+  --card:    #e8f2f8;
+  --muted:   #6b8aaa;
+  --border:  #d0e4f0;
+  --success: #00c896;
+  --shadow:  0 4px 24px rgba(11,31,58,.10);
+  --shadow-lg:0 16px 56px rgba(11,31,58,.16);
+  --r:       8px;
+  --r-lg:    16px;
+}
+
+/* ═══════════ UTILITY ═══════════ */
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.container-wide{max-width:1400px;margin:0 auto;padding:0 24px}
+.text-cyan{color:var(--cyan)}
+.text-navy{color:var(--navy)}
+.bg-navy{background:var(--navy)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* ═══════════ ANNOUNCE BAR ═══════════ */
+.ann-bar{
+  background:linear-gradient(90deg,var(--navy) 0%,var(--navy3) 100%);
+  padding:10px 24px;overflow:hidden;position:relative;
+}
+.ann-track{display:flex;gap:56px;animation:marquee 30s linear infinite;white-space:nowrap;width:max-content}
+.ann-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#b8d4ea;letter-spacing:.06em}
+.ann-item strong{color:var(--cyan)}
+.ann-dot{width:5px;height:5px;background:var(--cyan);border-radius:50%;flex-shrink:0}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ═══════════ HEADER ═══════════ */
+.site-header{
+  background:rgba(11,31,58,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(0,194,224,.12);
+  position:sticky;top:0;z-index:900;
+}
+.header-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  height:68px;padding:0 32px;max-width:1400px;margin:0 auto;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:38px;height:38px;background:linear-gradient(135deg,var(--cyan),#0080a0);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.logo-icon svg{width:20px;height:20px;fill:#fff}
+.logo-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.02em}
+.logo-text span{color:var(--cyan)}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{
+  font-size:13px;font-weight:500;color:#90b4d0;padding:8px 16px;
+  border-radius:6px;transition:all .2s;letter-spacing:.01em;
+}
+.nav-links a:hover,.nav-links a.active{color:#fff;background:rgba(255,255,255,.07)}
+.header-right{display:flex;align-items:center;gap:12px}
+.icon-btn{
+  width:40px;height:40px;border-radius:8px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);color:#90b4d0;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;
+}
+.icon-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cart-btn-hdr{
+  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--cyan),var(--cyan2));
+  color:var(--navy);padding:0 20px;height:40px;border-radius:8px;
+  font-size:13px;font-weight:700;letter-spacing:.02em;transition:all .2s;
+  position:relative;
+}
+.cart-btn-hdr:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,194,224,.35)}
+.cart-btn-hdr svg{width:16px;height:16px;stroke:var(--navy);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.cart-badge{
+  position:absolute;top:-6px;right:-6px;
+  background:var(--navy);color:var(--cyan);
+  width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;border:2px solid var(--cyan);
+}
+.mob-menu-btn{display:none;width:40px;height:40px;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,.1)}
+.mob-menu-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+
+/* ═══════════ MOBILE NAV ═══════════ */
+.mobile-nav{
+  display:none;position:fixed;inset:0;background:var(--navy);z-index:950;
+  flex-direction:column;padding:24px;transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.mobile-nav.open{transform:translateX(0)}
+.mob-nav-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px}
+.mob-close{width:40px;height:40px;background:rgba(255,255,255,.07);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+.mob-nav-links{display:flex;flex-direction:column;gap:8px}
+.mob-nav-links a{font-size:18px;font-weight:600;color:#b8d4ea;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.mob-nav-links a:hover{color:var(--cyan)}
+
+/* ═══════════ HERO ═══════════ */
+.hero{
+  background:linear-gradient(160deg,var(--navy) 0%,#0d2f52 55%,#0b3d5e 100%);
+  min-height:calc(100vh - 108px);position:relative;overflow:hidden;
+  display:flex;align-items:center;
+}
+.hero-mesh{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 50%,rgba(0,194,224,.10) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 60% at 20% 80%,rgba(0,130,190,.08) 0%,transparent 50%);
+}
+.hero-grid-lines{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,194,224,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,224,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.hero-inner{
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  align-items:center;width:100%;max-width:1400px;margin:0 auto;padding:80px 32px;
+}
+.hero-text{padding-right:40px}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,194,224,.12);border:1px solid rgba(0,194,224,.25);
+  padding:7px 16px;border-radius:100px;margin-bottom:24px;
+}
+.hero-eyebrow span{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan)}
+.hero-eyebrow-dot{width:6px;height:6px;background:var(--cyan);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.hero-h1{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:clamp(36px,4.5vw,60px);font-weight:800;line-height:1.05;
+  color:#fff;margin-bottom:20px;letter-spacing:-.03em;
+}
+.hero-h1 .highlight{
+  color:transparent;-webkit-text-fill-color:transparent;
+  background:linear-gradient(90deg,var(--cyan),#60e0ff);
+  -webkit-background-clip:text;background-clip:text;
+}
+.hero-sub{
+  font-size:17px;line-height:1.75;color:#90b4d0;
+  margin-bottom:36px;max-width:500px;font-weight:300;
+}
+.hero-price-block{
+  display:flex;align-items:center;gap:16px;margin-bottom:32px;
+  padding:20px 24px;background:rgba(0,194,224,.07);border:1px solid rgba(0,194,224,.18);
+  border-radius:var(--r-lg);max-width:380px;
+}
+.hero-price-sale{font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;color:#fff}
+.hero-price-orig{font-size:18px;color:var(--muted);text-decoration:line-through}
+.hero-price-badge{background:linear-gradient(135deg,#ff5757,#e03030);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;letter-spacing:.04em}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:36px}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--cyan),var(--cyan2));
+  color:var(--navy);padding:16px 32px;border-radius:var(--r);
+  font-size:14px;font-weight:700;letter-spacing:.02em;
+  transition:all .25s;border:none;cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,194,224,.30);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,194,224,.45)}
+.btn-primary svg{width:18px;height:18px;stroke:var(--navy);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.btn-primary:hover svg{transform:translateX(3px)}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);
+  color:#fff;padding:15px 28px;border-radius:var(--r);
+  font-size:14px;font-weight:500;transition:all .25s;cursor:pointer;
+}
+.btn-secondary:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+.btn-secondary svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero-trust{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.hero-trust-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#90b4d0;font-weight:400}
+.hero-trust-item svg{width:15px;height:15px;stroke:var(--cyan);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* Hero visual */
+.hero-visual{position:relative;display:flex;align-items:center;justify-content:center}
+.hero-product-wrap{
+  position:relative;z-index:2;
+  width:100%;max-width:520px;
+  filter:drop-shadow(0 32px 64px rgba(0,194,224,.20));
+}
+.hero-product-wrap img{width:100%;height:480px;object-fit:contain;border-radius:var(--r-lg)}
+.hero-glow{
+  position:absolute;width:400px;height:400px;
+  background:radial-gradient(circle,rgba(0,194,224,.22) 0%,transparent 70%);
+  border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1;
+  animation:glowPulse 4s ease-in-out infinite;
+}
+@keyframes glowPulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+.floating-badge{
+  position:absolute;background:var(--white);border-radius:12px;
+  padding:12px 16px;box-shadow:0 8px 32px rgba(11,31,58,.15);z-index:5;
+  display:flex;align-items:center;gap:10px;animation:float 4s ease-in-out infinite;
+}
+.floating-badge:nth-child(2){animation-delay:-2s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fb-top{top:10%;left:-10%}
+.fb-bottom{bottom:15%;right:-8%}
+.fb-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fb-icon-cyan{background:rgba(0,194,224,.12)}
+.fb-icon svg{width:18px;height:18px;stroke:var(--cyan);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fb-text{}
+.fb-val{font-size:16px;font-weight:700;color:var(--navy);line-height:1.1}
+.fb-lbl{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* ═══════════ TRUST STRIP ═══════════ */
+.trust-strip{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.trust-strip-inner{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  max-width:1200px;margin:0 auto;
+}
+.ts-item{
+  display:flex;align-items:center;gap:14px;padding:22px 28px;
+  border-right:1px solid var(--border);
+}
+.ts-item:last-child{border-right:none}
+.ts-icon{
+  width:44px;height:44px;background:rgba(0,194,224,.08);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  border:1px solid rgba(0,194,224,.15);
+}
+.ts-icon svg{width:20px;height:20px;stroke:var(--cyan);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ts-title{font-size:13.5px;font-weight:600;color:var(--navy)}
+.ts-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ═══════════ SECTION HELPERS ═══════════ */
+.section{padding:96px 0}
+.section-sm{padding:64px 0}
+.sec-label{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:14px;
+}
+.sec-label::before{content:'';width:24px;height:2px;background:var(--cyan);border-radius:2px}
+.sec-h2{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:clamp(28px,3.5vw,44px);font-weight:800;
+  color:var(--navy);line-height:1.12;letter-spacing:-.03em;margin-bottom:14px;
+}
+.sec-h2 span{color:var(--cyan)}
+.sec-p{font-size:16px;line-height:1.8;color:#4a6a8a;font-weight:300;max-width:560px}
+.text-center{text-align:center}
+.text-center .sec-p{margin:0 auto}
+.text-center .sec-label{justify-content:center}
+.text-center .sec-label::before{display:none}
+
+/* ═══════════ PRODUCT SHOWCASE ═══════════ */
+.showcase{background:#fff}
+.showcase-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.showcase-images{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.showcase-img-main{grid-column:1/-1;border-radius:var(--r-lg);overflow:hidden;height:320px;box-shadow:var(--shadow-lg);position:relative}
+.showcase-img-main img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.showcase-img-main:hover img{transform:scale(1.03)}
+.showcase-img-sm{border-radius:var(--r);overflow:hidden;height:180px;box-shadow:var(--shadow);position:relative}
+.showcase-img-sm img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.showcase-img-sm:hover img{transform:scale(1.04)}
+.img-overlay-label{
+  position:absolute;bottom:12px;left:12px;
+  background:rgba(11,31,58,.75);backdrop-filter:blur(8px);
+  padding:5px 12px;border-radius:100px;font-size:11px;font-weight:600;color:#fff;letter-spacing:.04em;
+}
+.showcase-features{display:flex;flex-direction:column;gap:0}
+.feat-row{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:20px 0;border-bottom:1px solid var(--border);
+}
+.feat-row:last-child{border-bottom:none}
+.feat-icon-wrap{
+  width:44px;height:44px;background:rgba(0,194,224,.08);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  border:1px solid rgba(0,194,224,.12);margin-top:2px;
+}
+.feat-icon-wrap svg{width:20px;height:20px;stroke:var(--cyan);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.feat-title{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.feat-desc{font-size:13.5px;line-height:1.65;color:#5a7a9a;font-weight:300}
+
+/* ═══════════ HOW IT WORKS ═══════════ */
+.how-section{background:var(--offwhite)}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
+.step-card{
+  background:#fff;border-radius:var(--r-lg);padding:36px 28px;
+  border:1px solid var(--border);position:relative;overflow:hidden;
+  transition:box-shadow .25s,transform .25s;
+}
+.step-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px)}
+.step-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--cyan),#60e0ff);border-radius:var(--r-lg) var(--r-lg) 0 0;
+}
+.step-num{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:48px;font-weight:800;
+  color:rgba(0,194,224,.12);line-height:1;margin-bottom:20px;
+}
+.step-icon{
+  width:52px;height:52px;background:linear-gradient(135deg,rgba(0,194,224,.12),rgba(0,194,224,.04));
+  border-radius:12px;border:1px solid rgba(0,194,224,.2);
+  display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+}
+.step-icon svg{width:24px;height:24px;stroke:var(--cyan);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.step-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:700;color:var(--navy);margin-bottom:10px}
+.step-text{font-size:14px;line-height:1.75;color:#5a7a9a;font-weight:300}
+.step-img{width:100%;height:180px;object-fit:cover;border-radius:var(--r);margin-top:20px}
+
+/* ═══════════ DARK SPECS SECTION ═══════════ */
+.specs-section{
+  background:linear-gradient(160deg,var(--navy) 0%,#0d3060 100%);
+  position:relative;overflow:hidden;
+}
+.specs-mesh{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 50% 80% at 80% 50%,rgba(0,194,224,.08) 0%,transparent 60%);
+}
+.specs-grid-lines{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,194,224,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,224,.03) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+.specs-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;position:relative;z-index:2}
+.specs-content .sec-h2{color:#fff}
+.specs-content .sec-p{color:#7aa0c0}
+.specs-list{display:flex;flex-direction:column;gap:0;margin-top:36px}
+.spec-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06);
+}
+.spec-item:last-child{border-bottom:none}
+.spec-name{font-size:14px;color:#7aa0c0;font-weight:400;display:flex;align-items:center;gap:10px}
+.spec-name svg{width:16px;height:16px;stroke:var(--cyan);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.spec-val{font-size:14px;font-weight:600;color:#fff}
+.specs-visual{display:flex;flex-direction:column;gap:16px}
+.specs-img-hero{border-radius:var(--r-lg);overflow:hidden;height:340px;position:relative}
+.specs-img-hero img{width:100%;height:100%;object-fit:cover}
+.specs-img-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(11,31,58,.5) 0%,transparent 60%)}
+.specs-img-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.specs-img-sm{border-radius:var(--r);overflow:hidden;height:130px}
+.specs-img-sm img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.specs-img-sm:hover img{transform:scale(1.05)}
+
+/* ═══════════ STATS BAR ═══════════ */
+.stats-bar{
+  background:linear-gradient(90deg,var(--cyan) 0%,#00a0bc 100%);
+  padding:48px 0;
+}
+.stats-inner{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  max-width:1100px;margin:0 auto;padding:0 24px;
+}
+.stat-item{text-align:center;padding:0 20px;border-right:1px solid rgba(255,255,255,.2)}
+.stat-item:last-child{border-right:none}
+.stat-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:42px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:6px}
+.stat-lbl{font-size:13px;font-weight:600;color:rgba(11,31,58,.65);letter-spacing:.04em;text-transform:uppercase}
+
+/* ═══════════ REVIEWS ═══════════ */
+.reviews-section{background:#fff}
+.reviews-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:48px}
+.overall-score{display:flex;align-items:center;gap:20px}
+.score-big{font-family:'Plus Jakarta Sans',sans-serif;font-size:72px;font-weight:800;color:var(--navy);line-height:1}
+.score-stars{display:flex;gap:3px;margin-bottom:6px}
+.score-stars svg{width:18px;height:18px;fill:var(--cyan);stroke:none}
+.score-count{font-size:14px;color:var(--muted)}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.rev-card{
+  background:var(--offwhite);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:28px 24px;
+  transition:box-shadow .2s,transform .2s;
+}
+.rev-card:hover{box-shadow:var(--shadow);transform:translateY(-3px)}
+.rev-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.rev-stars{display:flex;gap:2px}
+.rev-stars svg{width:13px;height:13px;fill:var(--cyan);stroke:none}
+.rev-date{font-size:11.5px;color:var(--muted)}
+.rev-text{font-size:14px;line-height:1.78;color:#2a4a6a;margin-bottom:18px;font-style:italic}
+.rev-author{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--border)}
+.rev-av{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
+.rev-av-placeholder{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan),#0080a0);
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;
+}
+.rev-name{font-size:13px;font-weight:600;color:var(--navy)}
+.rev-loc{font-size:11.5px;color:var(--muted);margin-top:2px}
+.rev-verified{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--success);margin-top:3px}
+.rev-verified svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2}
+
+/* ═══════════ PRODUCT CTA SECTION ═══════════ */
+.product-cta{
+  background:linear-gradient(135deg,var(--navy) 0%,#0d3060 60%,#0a2840 100%);
+  position:relative;overflow:hidden;
+}
+.pcta-mesh{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 30% 50%,rgba(0,194,224,.10) 0%,transparent 60%);pointer-events:none}
+.pcta-inner{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:center;position:relative;z-index:2}
+.pcta-content{padding:96px 64px 96px 0}
+.pcta-content .sec-h2{color:#fff;font-size:clamp(28px,3vw,42px)}
+.pcta-content .sec-p{color:#7aa0c0;margin-bottom:36px}
+.pcta-price-block{
+  display:flex;align-items:center;gap:16px;margin-bottom:32px;
+  padding:18px 22px;background:rgba(0,194,224,.08);
+  border:1px solid rgba(0,194,224,.2);border-radius:var(--r);display:inline-flex;
+}
+.pcta-price-sale{font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;color:#fff}
+.pcta-price-orig{font-size:16px;color:rgba(255,255,255,.4);text-decoration:line-through}
+.pcta-price-off{background:linear-gradient(135deg,#ff5757,#e03030);color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700}
+.pcta-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.pcta-perks{display:flex;flex-direction:column;gap:10px}
+.pcta-perk{display:flex;align-items:center;gap:10px;font-size:13.5px;color:#7aa0c0}
+.pcta-perk svg{width:16px;height:16px;stroke:var(--cyan);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.pcta-visual{
+  background:rgba(0,194,224,.04);border-left:1px solid rgba(0,194,224,.1);
+  display:flex;align-items:center;justify-content:center;padding:64px 48px;min-height:560px;
+}
+.pcta-product-img{
+  width:100%;max-width:400px;
+  filter:drop-shadow(0 24px 48px rgba(0,194,224,.25));
+  animation:floatProduct 5s ease-in-out infinite;
+}
+@keyframes floatProduct{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* ═══════════ FAQ ═══════════ */
+.faq-section{background:var(--offwhite)}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 60px;margin-top:52px}
+.faq-item{
+  padding:22px 0;border-bottom:1px solid var(--border);cursor:pointer;
+}
+.faq-head{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq-q{font-size:15px;font-weight:600;color:var(--navy);line-height:1.4}
+.faq-toggle{
+  width:28px;height:28px;border-radius:50%;background:rgba(0,194,224,.1);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s;
+}
+.faq-toggle svg{width:14px;height:14px;stroke:var(--cyan);fill:none;stroke-width:2.5;stroke-linecap:round;transition:transform .25s}
+.faq-item.open .faq-toggle{background:var(--cyan)}
+.faq-item.open .faq-toggle svg{stroke:#fff;transform:rotate(45deg)}
+.faq-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-item.open .faq-body{max-height:200px}
+.faq-a{padding:14px 0 4px;font-size:14px;line-height:1.78;color:#4a6a8a;font-weight:300}
+
+/* ═══════════ NEWSLETTER ═══════════ */
+.newsletter{
+  background:linear-gradient(135deg,var(--cyan) 0%,#0090b0 100%);
+  padding:80px 0;
+}
+.nl-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1000px;margin:0 auto;padding:0 24px}
+.nl-h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;color:var(--navy);line-height:1.15;margin-bottom:10px}
+.nl-p{font-size:15px;color:rgba(11,31,58,.65);line-height:1.7}
+.nl-form-wrap{display:flex;flex-direction:column;gap:12px}
+.nl-form{display:flex;gap:0;border-radius:var(--r);overflow:hidden;box-shadow:0 8px 32px rgba(11,31,58,.15)}
+.nl-input{
+  flex:1;padding:16px 20px;font-size:14px;
+  border:none;outline:none;font-family:'Inter',sans-serif;color:var(--navy);
+  background:#fff;
+}
+.nl-input::placeholder{color:var(--muted)}
+.nl-btn{
+  background:var(--navy);color:var(--cyan);padding:16px 24px;
+  font-size:13px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;cursor:pointer;border:none;transition:background .2s;white-space:nowrap;
+}
+.nl-btn:hover{background:#0d2748}
+.nl-note{font-size:12px;color:rgba(11,31,58,.5);display:flex;align-items:center;gap:6px}
+.nl-note svg{width:13px;height:13px;stroke:rgba(11,31,58,.5);fill:none;stroke-width:2;flex-shrink:0}
+
+/* ═══════════ FOOTER ═══════════ */
+.site-footer{background:var(--navy);border-top:1px solid rgba(0,194,224,.1)}
+.footer-top{
+  display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:48px;
+  padding:64px 32px 48px;max-width:1400px;margin:0 auto;
+}
+.f-brand .f-logo{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.f-brand .f-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--cyan),#0080a0);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.f-brand .f-logo-icon svg{width:18px;height:18px;fill:#fff}
+.f-brand .f-logo-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:#fff;letter-spacing:-.01em}
+.f-brand .f-logo-text span{color:var(--cyan)}
+.f-tagline{font-size:13.5px;color:#5a7a9a;line-height:1.75;max-width:240px;margin-bottom:24px;font-weight:300}
+.f-social{display:flex;gap:8px}
+.f-soc{
+  width:36px;height:36px;border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;color:#5a7a9a;transition:all .2s;cursor:pointer;
+}
+.f-soc:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,194,224,.08)}
+.f-soc svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.f-col-h{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#fff;margin-bottom:20px}
+.f-links{display:flex;flex-direction:column;gap:10px}
+.f-links a{font-size:13.5px;color:#5a7a9a;transition:color .2s;font-weight:300}
+.f-links a:hover{color:var(--cyan)}
+.footer-divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:0}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:22px 32px;max-width:1400px;margin:0 auto;flex-wrap:wrap;gap:16px;
+}
+.f-copy{font-size:12.5px;color:#3a5a7a;font-weight:300}
+.f-pay-badges{display:flex;gap:6px;flex-wrap:wrap}
+.f-pay-badge{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  padding:4px 10px;border-radius:4px;font-size:10.5px;font-weight:600;color:#5a7a9a;letter-spacing:.04em;
+}
+.f-shopify{font-size:12px;color:#3a5a7a;display:flex;align-items:center;gap:6px}
+
+/* ═══════════ CART DRAWER ═══════════ */
+.overlay{position:fixed;inset:0;background:rgba(11,31,58,.5);z-index:800;display:none;opacity:0;transition:opacity .3s}
+.overlay.open{display:block;opacity:1}
+.cart-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:400px;max-width:92vw;
+  background:#fff;z-index:850;transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;box-shadow:-8px 0 48px rgba(11,31,58,.18);
+}
+.cart-drawer.open{transform:translateX(0)}
+.drawer-h{display:flex;align-items:center;justify-content:space-between;padding:22px 24px;border-bottom:1px solid var(--border)}
+.drawer-h h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:700;color:var(--navy)}
+.drawer-close{width:36px;height:36px;border-radius:8px;background:var(--offwhite);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:18px;transition:all .2s}
+.drawer-close:hover{background:var(--border);color:var(--navy)}
+.drawer-body{flex:1;overflow-y:auto;padding:24px}
+.cart-empty{text-align:center;padding:64px 20px}
+.cart-empty-icon{width:72px;height:72px;background:rgba(0,194,224,.08);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.cart-empty-icon svg{width:32px;height:32px;stroke:var(--cyan);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.cart-empty p{font-size:15px;color:var(--muted);margin-bottom:24px}
+.cart-item-d{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid var(--border)}
+.cart-item-d img{width:80px;height:80px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;line-height:1.3}
+.ci-meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+.ci-row{display:flex;align-items:center;justify-content:space-between}
+.ci-qty{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.ci-qty button{width:30px;height:30px;font-size:16px;color:var(--navy);transition:background .15s;background:#fff}
+.ci-qty button:hover{background:var(--offwhite)}
+.ci-qty span{width:32px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+.ci-price{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;color:var(--navy)}
+.ci-remove{font-size:11.5px;color:var(--muted);cursor:pointer;margin-top:6px;transition:color .15s}
+.ci-remove:hover{color:#e03030}
+.drawer-foot{padding:20px 24px;border-top:1px solid var(--border)}
+.cart-total-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.cart-total-row span{font-size:14px;color:var(--muted)}
+.cart-total-row strong{font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--navy)}
+.cart-free-shipping{font-size:12.5px;color:var(--success);display:flex;align-items:center;gap:6px;margin-bottom:20px}
+.cart-free-shipping svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ═══════════ TOAST ═══════════ */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--navy);color:#fff;padding:14px 24px;border-radius:var(--r);
+  z-index:1000;transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);pointer-events:none;
+  border-left:3px solid var(--cyan);max-width:90vw;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast svg{width:16px;height:16px;stroke:var(--cyan);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.toast span{font-size:13.5px;font-weight:500}
+
+/* ═══════════ BACK TO TOP ═══════════ */
+.back-top{
+  position:fixed;bottom:28px;right:28px;width:46px;height:46px;
+  background:linear-gradient(135deg,var(--cyan),var(--cyan2));
+  border-radius:50%;display:none;align-items:center;justify-content:center;
+  cursor:pointer;z-index:500;box-shadow:0 4px 16px rgba(0,194,224,.4);transition:transform .2s;
+}
+.back-top.show{display:flex}
+.back-top:hover{transform:translateY(-3px)}
+.back-top svg{width:20px;height:20px;stroke:var(--navy);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:48px;text-align:center}
+  .hero-text{padding-right:0}
+  .hero-sub,.hero-price-block,.hero-trust{margin-left:auto;margin-right:auto}
+  .hero-ctas{justify-content:center}
+  .hero-price-block{justify-content:center}
+  .hero-trust{justify-content:center}
+  .hero-visual{max-width:480px;margin:0 auto}
+  .fb-top{left:0}
+  .fb-bottom{right:0}
+  .showcase-grid{grid-template-columns:1fr;gap:40px}
+  .specs-inner{grid-template-columns:1fr;gap:48px}
+  .pcta-inner{grid-template-columns:1fr}
+  .pcta-content{padding:80px 0 48px}
+  .pcta-visual{min-height:300px;padding:40px}
+  .nl-inner{grid-template-columns:1fr;gap:32px;text-align:center}
+  .faq-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr;gap:32px}
+  .stats-inner{grid-template-columns:repeat(2,1fr);gap:24px}
+  .stat-item{border-right:none;padding:20px}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .mob-menu-btn{display:flex}
+  .mobile-nav{display:flex}
+  .hero-inner{padding:56px 24px}
+  .hero-h1{font-size:36px}
+  .hero-visual{display:none}
+  .steps-grid{grid-template-columns:1fr}
+  .reviews-grid{grid-template-columns:1fr}
+  .reviews-header{flex-direction:column;align-items:flex-start;gap:20px}
+  .trust-strip-inner{grid-template-columns:repeat(2,1fr)}
+  .ts-item{border-right:none;border-bottom:1px solid var(--border)}
+  .ts-item:nth-child(2),.ts-item:nth-child(4){border-right:none}
+  .ts-item:nth-child(1),.ts-item:nth-child(2){border-right:1px solid var(--border)}
+  .footer-top{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center;gap:12px}
+  .stats-inner{grid-template-columns:1fr 1fr}
+  .section{padding:64px 0}
+  .showcase-images{grid-template-columns:1fr}
+  .showcase-img-main{height:260px}
+  .showcase-img-sm{height:160px}
+  .faq-grid{grid-template-columns:1fr}
+  .cart-drawer{width:100%;max-width:100%}
+}
+@media(max-width:480px){
+  .hero-h1{font-size:30px}
+  .hero-ctas{flex-direction:column;align-items:center}
+  .btn-primary,.btn-secondary{width:100%;justify-content:center}
+  .hero-price-block{flex-direction:column;text-align:center;gap:10px}
+  .pcta-ctas{flex-direction:column}
+  .trust-strip-inner{grid-template-columns:1fr}
+  .ts-item{border-right:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ ANNOUNCE BAR ═══ -->
+<div class="ann-bar">
+  <div class="ann-track">
+    <span class="ann-item"><span class="ann-dot"></span>Free Worldwide Shipping</span>
+    <span class="ann-item"><span class="ann-dot"></span><strong>Dhs. 522</strong> — Save 39% Today</span>
+    <span class="ann-item"><span class="ann-dot"></span>30-Day Money-Back Guarantee</span>
+    <span class="ann-item"><span class="ann-dot"></span>4.7★ Rated by 2,800+ Customers</span>
+    <span class="ann-item"><span class="ann-dot"></span>Free Worldwide Shipping</span>
+    <span class="ann-item"><span class="ann-dot"></span><strong>Dhs. 522</strong> — Save 39% Today</span>
+    <span class="ann-item"><span class="ann-dot"></span>30-Day Money-Back Guarantee</span>
+    <span class="ann-item"><span class="ann-dot"></span>4.7★ Rated by 2,800+ Customers</span>
+  </div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <span class="logo-text">Wash<span>It</span>Right</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#" class="active">Home</a>
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#specs">Specs</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="header-right">
+      <button class="icon-btn" title="Search" onclick="document.querySelector('.search-input-hdr')?.focus()">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="icon-btn" title="Wishlist" onclick="showToast('Added to wishlist ♥')">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <button class="cart-btn-hdr" onclick="openCart()">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Cart
+        <span class="cart-badge" id="cartCount">0</span>
+      </button>
+      <button class="mob-menu-btn" onclick="openMobileNav()">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MOBILE NAV ═══ -->
+<div class="mobile-nav" id="mobileNav">
+  <div class="mob-nav-head">
+    <span class="logo-text" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;color:#fff">Wash<span style="color:var(--cyan)">It</span>Right</span>
+    <div class="mob-close" onclick="closeMobileNav()">✕</div>
+  </div>
+  <div class="mob-nav-links">
+    <a href="#" onclick="closeMobileNav()">Home</a>
+    <a href="#features" onclick="closeMobileNav()">Features</a>
+    <a href="#how-it-works" onclick="closeMobileNav()">How It Works</a>
+    <a href="#specs" onclick="closeMobileNav()">Specs</a>
+    <a href="#reviews" onclick="closeMobileNav()">Reviews</a>
+    <a href="#faq" onclick="closeMobileNav()">FAQ</a>
+  </div>
+  <button class="btn-primary" style="margin-top:40px;width:100%;justify-content:center" onclick="closeMobileNav();openCart()">
+    <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    Shop Now — Dhs. 522
+  </button>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="home">
+  <div class="hero-mesh"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span><span>New Generation Smart Cleaning</span></div>
+      <h1 class="hero-h1">Windows that<br><span class="highlight">Clean Themselves.</span><br>No Ladders. No Effort.</h1>
+      <p class="hero-sub">Meet the WashItRight Robot — the AI-powered window cleaner that sticks to glass, sprays, scrubs, and delivers a streak-free shine every time. Hands-free. Every time.</p>
+      <div class="hero-price-block">
+        <div>
+          <div class="hero-price-sale">Dhs. 522</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+            <span class="hero-price-orig">Dhs. 858</span>
+            <span class="hero-price-badge">Save 39%</span>
+          </div>
+        </div>
+        <div style="width:1px;height:48px;background:rgba(0,194,224,.2)"></div>
+        <div>
+          <div style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:4px">Limited Offer</div>
+          <div style="font-size:13px;color:#7aa0c0">While stock lasts</div>
+        </div>
+      </div>
+      <div class="hero-ctas">
+        <button class="btn-primary btn-lg" onclick="addToCart()">
+          <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Add to Cart — Dhs. 522
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="btn-secondary" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="10 15 15 12 10 9 10 15"/></svg>
+          See it in action
+        </button>
+      </div>
+      <div class="hero-trust">
+        <div class="hero-trust-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Free worldwide shipping</div>
+        <div class="hero-trust-item"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>30-day returns</div>
+        <div class="hero-trust-item"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Secure checkout</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-glow"></div>
+      <div class="floating-badge fb-top">
+        <div class="fb-icon fb-icon-cyan"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="fb-text"><div class="fb-val">Suction Lock</div><div class="fb-lbl">100% secure on glass</div></div>
+      </div>
+      <div class="hero-product-wrap">
+        <img
+          src="https://washitright.net/cdn/shop/files/S6e303ed0adc7468f8a355412f77be94eA.webp?v=1782593582&width=800"
+          alt="WashItRight Advanced Robot Window Cleaner"
+          onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&auto=format&fit=crop&q=85'"
+        >
+      </div>
+      <div class="floating-badge fb-bottom">
+        <div class="fb-icon fb-icon-cyan"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <div class="fb-text"><div class="fb-val">4.7 / 5 ★</div><div class="fb-lbl">2,800+ reviews</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TRUST STRIP ═══ -->
+<div class="trust-strip">
+  <div class="trust-strip-inner">
+    <div class="ts-item">
+      <div class="ts-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+      <div><div class="ts-title">Free Worldwide Shipping</div><div class="ts-sub">On every order, always</div></div>
+    </div>
+    <div class="ts-item">
+      <div class="ts-icon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
+      <div><div class="ts-title">30-Day Money Back</div><div class="ts-sub">No questions asked</div></div>
+    </div>
+    <div class="ts-item">
+      <div class="ts-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+      <div><div class="ts-title">2-Year Warranty</div><div class="ts-sub">Full manufacturer coverage</div></div>
+    </div>
+    <div class="ts-item">
+      <div class="ts-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+      <div><div class="ts-title">Secure Payments</div><div class="ts-sub">SSL encrypted checkout</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRODUCT SHOWCASE ═══ -->
+<section class="section showcase" id="features">
+  <div class="container">
+    <div class="showcase-grid">
+      <div class="showcase-images">
+        <div class="showcase-img-main">
+          <img
+            src="https://washitright.net/cdn/shop/files/Se174e81a876f4627bbc0936e60491d3fT.webp?v=1782585936&width=1000"
+            alt="Robot on window glass"
+            onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop&q=85'"
+          >
+          <div class="img-overlay-label">Auto Edge Detection</div>
+        </div>
+        <div class="showcase-img-sm">
+          <img
+            src="https://washitright.net/cdn/shop/files/Sdf293b72524f483294798925efd0061aA.webp?v=1782593615&width=600"
+            alt="Spray system close-up"
+            onerror="this.src='https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&auto=format&fit=crop&q=85'"
+          >
+          <div class="img-overlay-label">Smart Spray</div>
+        </div>
+        <div class="showcase-img-sm">
+          <img
+            src="https://washitright.net/cdn/shop/files/Sbb9a3bea344d4149bb598a6b0206d6fcL.webp?v=1782593700&width=600"
+            alt="Robot cleaning detail"
+            onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&auto=format&fit=crop&q=85'"
+          >
+          <div class="img-overlay-label">Microfiber Pads</div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-label">Core Features</div>
+        <h2 class="sec-h2">Everything you need.<br><span>Nothing you don't.</span></h2>
+        <p class="sec-p" style="margin-bottom:32px">Six smart technologies work together to deliver a flawless streak-free finish — automatically, every single time.</p>
+        <div class="showcase-features">
+          <div class="feat-row">
+            <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div><div class="feat-title">Intelligent Edge Detection</div><div class="feat-desc">AI navigation reads window borders in real-time, preventing falls and covering every centimetre without overlap.</div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/></svg></div>
+            <div><div class="feat-title">Built-in Smart Spray System</div><div class="feat-desc">Precision water-spray distributes cleaning solution evenly across the glass for deep stain removal without waste.</div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><div class="feat-title">Powerful Vacuum Suction</div><div class="feat-desc">Military-grade suction cup system adheres to vertical glass at any angle — even tilted or overhead windows.</div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
+            <div><div class="feat-title">Dual Rotating Microfiber Pads</div><div class="feat-desc">Dual counter-rotating pads lift and trap dust, fingerprints, grease, and grime in a single smooth pass.</div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+            <div><div class="feat-title">One-Touch Operation</div><div class="feat-desc">Press once and walk away. The robot handles the entire cleaning cycle and parks itself when done.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="section how-section" id="how-it-works">
+  <div class="container">
+    <div class="text-center">
+      <div class="sec-label">How It Works</div>
+      <h2 class="sec-h2">Three steps to <span>spotless windows.</span></h2>
+      <p class="sec-p">From box to brilliant in under a minute. No setup headaches, no learning curve.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="step-title">Place & Stick</div>
+        <p class="step-text">Press the robot against any smooth glass surface — windows, mirrors, shower doors. The vacuum suction instantly locks it in place. No tape, no brackets.</p>
+        <img
+          src="https://washitright.net/cdn/shop/files/S6e303ed0adc7468f8a355412f77be94eA.webp?v=1782593582&width=600"
+          alt="Robot attaching to window"
+          class="step-img"
+          onerror="this.style.display='none'"
+        >
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+        <div class="step-title">Press & Go</div>
+        <p class="step-text">Hit the single power button. The built-in spray activates and the dual microfiber pads begin rotating. Smart navigation maps the entire window surface automatically.</p>
+        <img
+          src="https://washitright.net/cdn/shop/files/Sdf293b72524f483294798925efd0061aA.webp?v=1782593615&width=600"
+          alt="Robot cleaning in action"
+          class="step-img"
+          onerror="this.style.display='none'"
+        >
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <div class="step-title">Enjoy Crystal Clarity</div>
+        <p class="step-text">The robot finishes its path, powers down, and you're left with a streak-free, professionally clean window. No ladders, no chemicals, no effort.</p>
+        <img
+          src="https://washitright.net/cdn/shop/files/S0f83af00fa274f73b225d5e0d5901ec3G.webp?v=1782593761&width=600"
+          alt="Sparkling clean window result"
+          class="step-img"
+          onerror="this.style.display='none'"
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS BAR ═══ -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-val" data-target="2800">0</div><div class="stat-lbl">Happy Customers</div></div>
+    <div class="stat-item"><div class="stat-val">4.7★</div><div class="stat-lbl">Average Rating</div></div>
+    <div class="stat-item"><div class="stat-val">39%</div><div class="stat-lbl">Off Regular Price</div></div>
+    <div class="stat-item"><div class="stat-val">2yr</div><div class="stat-lbl">Full Warranty</div></div>
+  </div>
+</div>
+
+<!-- ═══ SPECS DARK ═══ -->
+<section class="section specs-section" id="specs">
+  <div class="specs-mesh"></div>
+  <div class="specs-grid-lines"></div>
+  <div class="container">
+    <div class="specs-inner">
+      <div class="specs-content">
+        <div class="sec-label" style="color:var(--cyan)">Technical Specs</div>
+        <h2 class="sec-h2" style="color:#fff">Built with<br><span>precision engineering.</span></h2>
+        <p class="sec-p" style="color:#7aa0c0;margin-bottom:0">Every component chosen for maximum performance, minimal noise, and years of reliable use.</p>
+        <div class="specs-list">
+          <div class="spec-item">
+            <span class="spec-name"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Suction System</span>
+            <span class="spec-val">2800 Pa Vacuum</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-name"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Pad Speed</span>
+            <span class="spec-val">120 RPM Dual Rotation</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-name"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/></svg>Water Tank</span>
+            <span class="spec-val">100ml Built-in Reservoir</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-name"><svg viewBox="0 0 24 24"><rect x="1" y="6" width="22" height="12" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Battery Life</span>
+            <span class="spec-val">Up to 60 min per charge</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-name"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>Noise Level</span>
+            <span class="spec-val">&lt;55 dB (Whisper Quiet)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-name"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Surface Compatibility</span>
+            <span class="spec-val">Glass, Mirror, Tile, Shower</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-name"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Weight</span>
+            <span class="spec-val">680g (Ultra Lightweight)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-name"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>Warranty</span>
+            <span class="spec-val">2 Years Full Coverage</span>
+          </div>
+        </div>
+      </div>
+      <div class="specs-visual">
+        <div class="specs-img-hero">
+          <img
+            src="https://washitright.net/cdn/shop/files/Se174e81a876f4627bbc0936e60491d3fT.webp?v=1782585936&width=900"
+            alt="Robot window cleaner in use"
+            onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&auto=format&fit=crop&q=85'"
+          >
+          <div class="specs-img-hero-overlay"></div>
+        </div>
+        <div class="specs-img-row">
+          <div class="specs-img-sm">
+            <img
+              src="https://washitright.net/cdn/shop/files/Sbb9a3bea344d4149bb598a6b0206d6fcL.webp?v=1782593700&width=400"
+              alt="Robot detail view"
+              onerror="this.src='https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&auto=format&fit=crop&q=85'"
+            >
+          </div>
+          <div class="specs-img-sm">
+            <img
+              src="https://washitright.net/cdn/shop/files/S0f83af00fa274f73b225d5e0d5901ec3G.webp?v=1782593761&width=400"
+              alt="Clean window result"
+              onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&auto=format&fit=crop&q=85'"
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ REVIEWS ═══ -->
+<section class="section reviews-section" id="reviews">
+  <div class="container">
+    <div class="reviews-header">
+      <div>
+        <div class="sec-label">Customer Reviews</div>
+        <h2 class="sec-h2">2,800+ happy <span>windows.</span></h2>
+      </div>
+      <div class="overall-score">
+        <div class="score-big">4.7</div>
+        <div>
+          <div class="score-stars">
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg>
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg>
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg>
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg>
+            <svg viewBox="0 0 20 20" style="opacity:.4"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg>
+          </div>
+          <div class="score-count">Based on 2,800+ verified reviews</div>
+        </div>
+      </div>
+    </div>
+    <div class="reviews-grid">
+      <div class="rev-card">
+        <div class="rev-top">
+          <div class="rev-stars"><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg></div>
+          <span class="rev-date">June 2026</span>
+        </div>
+        <p class="rev-text">"Absolutely blown away. Our floor-to-ceiling windows haven't been this clean since we moved in. Took about 8 minutes per panel and the result was streak-free perfection. No more expensive window cleaning services!"</p>
+        <div class="rev-author">
+          <div class="rev-av-placeholder">S</div>
+          <div><div class="rev-name">Sarah M.</div><div class="rev-loc">Dubai, UAE</div><div class="rev-verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified Purchase</div></div>
+        </div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-top">
+          <div class="rev-stars"><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg></div>
+          <span class="rev-date">May 2026</span>
+        </div>
+        <p class="rev-text">"I was skeptical at first — a robot that cleans windows? But this thing is legitimately impressive. The suction is incredibly strong, it navigates around the edges perfectly, and the spray system means I don't have to add anything extra. Worth every dirham."</p>
+        <div class="rev-author">
+          <div class="rev-av-placeholder">A</div>
+          <div><div class="rev-name">Ahmed K.</div><div class="rev-loc">Abu Dhabi, UAE</div><div class="rev-verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified Purchase</div></div>
+        </div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-top">
+          <div class="rev-stars"><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg><svg viewBox="0 0 20 20" style="opacity:.4"><path d="M10 1l2.39 4.84L18 6.78l-4 3.9.94 5.5L10 13.77l-4.94 2.41.94-5.5-4-3.9 5.61-.94z"/></svg></div>
+          <span class="rev-date">June 2026</span>
+        </div>
+        <p class="rev-text">"We have a big glass office building and this saves us so much time. Ordered 4 units — they've been running for 3 months without issue. Battery lasts well and the edge detection means we've never had it fall. Solid product."</p>
+        <div class="rev-author">
+          <div class="rev-av-placeholder">R</div>
+          <div><div class="rev-name">Ravi P.</div><div class="rev-loc">Singapore</div><div class="rev-verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified Purchase</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRODUCT CTA ═══ -->
+<section class="product-cta section" id="buy">
+  <div class="pcta-mesh"></div>
+  <div class="container-wide">
+    <div class="pcta-inner">
+      <div class="pcta-content">
+        <div class="sec-label" style="color:var(--cyan)">Limited Time Offer</div>
+        <h2 class="sec-h2" style="color:#fff;font-size:clamp(28px,3vw,44px)">Get spotless windows<br><span>starting today.</span></h2>
+        <p class="sec-p" style="color:#7aa0c0;margin-bottom:28px">Join 2,800+ homeowners who've replaced dangerous ladders and expensive window cleaners with one smart robot. Your windows deserve better.</p>
+        <div class="pcta-price-block">
+          <span class="pcta-price-sale">Dhs. 522</span>
+          <span class="pcta-price-orig">Dhs. 858</span>
+          <span class="pcta-price-off">Save 39%</span>
+        </div>
+        <div class="pcta-ctas" style="margin-top:20px">
+          <button class="btn-primary btn-lg" onclick="addToCart()">
+            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Add to Cart Now
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="btn-secondary">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Ask a Question
+          </button>
+        </div>
+        <div class="pcta-perks">
+          <div class="pcta-perk"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Free worldwide shipping — ships in 24 hours</div>
+          <div class="pcta-perk"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>30-day money-back guarantee, no questions asked</div>
+          <div class="pcta-perk"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>2-year full manufacturer warranty included</div>
+          <div class="pcta-perk"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Visa, Mastercard, PayPal, Apple Pay accepted</div>
+        </div>
+      </div>
+      <div class="pcta-visual">
+        <img class="pcta-product-img"
+          src="https://washitright.net/cdn/shop/files/S6e303ed0adc7468f8a355412f77be94eA.webp?v=1782593582&width=700"
+          alt="Advanced Robot Window Cleaner product"
+          onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&auto=format&fit=crop&q=85'"
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="section faq-section" id="faq">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:0">
+      <div class="sec-label">FAQ</div>
+      <h2 class="sec-h2">Questions, <span>answered.</span></h2>
+      <p class="sec-p" style="margin:0 auto 0">Everything you need to know before you buy.</p>
+    </div>
+    <div class="faq-grid">
+      <div>
+        <div class="faq-item open">
+          <div class="faq-head" onclick="toggleFaq(this)">
+            <span class="faq-q">Will it fall off my window?</span>
+            <div class="faq-toggle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          </div>
+          <div class="faq-body">
+            <p class="faq-a">No. The robot uses 2800Pa industrial-grade vacuum suction that maintains contact even on slightly inclined surfaces. Additionally, it comes with a safety tether wire as a backup — so it's double-protected against falls.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-head" onclick="toggleFaq(this)">
+            <span class="faq-q">What surfaces can it clean?</span>
+            <div class="faq-toggle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          </div>
+          <div class="faq-body">
+            <p class="faq-a">The robot works on any smooth, flat glass surface — home windows, office glass, mirrors, glass shower doors, glass table tops, and smooth ceramic tiles. It is not suitable for textured, frosted, or curved glass.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-head" onclick="toggleFaq(this)">
+            <span class="faq-q">How long does the battery last?</span>
+            <div class="faq-toggle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          </div>
+          <div class="faq-body">
+            <p class="faq-a">The robot runs for up to 60 minutes per charge, which is enough to clean 8–12 standard windows depending on size. It charges fully in about 3 hours via the included USB-C charging cable.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="faq-item">
+          <div class="faq-head" onclick="toggleFaq(this)">
+            <span class="faq-q">Do I need to add my own cleaning solution?</span>
+            <div class="faq-toggle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          </div>
+          <div class="faq-body">
+            <p class="faq-a">Yes — you add your preferred cleaning solution (or just water) to the 100ml built-in reservoir. We recommend a diluted window cleaning solution for the best streak-free results. The robot distributes it evenly as it moves.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-head" onclick="toggleFaq(this)">
+            <span class="faq-q">How loud is it?</span>
+            <div class="faq-toggle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          </div>
+          <div class="faq-body">
+            <p class="faq-a">The robot operates at under 55 decibels — quieter than a normal conversation. You can easily watch TV or work in the same room without any distraction while it cleans.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-head" onclick="toggleFaq(this)">
+            <span class="faq-q">What's in the box?</span>
+            <div class="faq-toggle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          </div>
+          <div class="faq-body">
+            <p class="faq-a">In the box: 1× Robot Window Cleaner, 2× Microfiber cleaning pads, 1× USB-C charging cable, 1× Safety tether wire, 1× Remote control, and 1× User manual. Everything you need to get started immediately.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NEWSLETTER ═══ -->
+<section class="newsletter">
+  <div class="nl-inner">
+    <div>
+      <h2 class="nl-h2">Stay in the loop.</h2>
+      <p class="nl-p">Get exclusive deals, cleaning tips, and new product announcements — straight to your inbox. No spam, just value.</p>
+    </div>
+    <div class="nl-form-wrap">
+      <div class="nl-form">
+        <input class="nl-input" type="email" placeholder="your@email.com" id="nlEmail">
+        <button class="nl-btn" onclick="subscribeNewsletter()">Subscribe</button>
+      </div>
+      <p class="nl-note">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        No spam. Unsubscribe anytime. We respect your privacy.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="f-brand">
+      <div class="f-logo">
+        <div class="f-logo-icon"><svg viewBox="0 0 24 24" fill="#fff"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22" stroke="#fff" stroke-width="1.5" fill="none"/></svg></div>
+        <span class="f-logo-text">Wash<span>It</span>Right</span>
+      </div>
+      <p class="f-tagline">Advanced automatic window cleaning technology for homes and offices worldwide. Clean smarter, not harder.</p>
+      <div class="f-social">
+        <div class="f-soc" title="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
+        <div class="f-soc" title="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+        <div class="f-soc" title="TikTok"><svg viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg></div>
+        <div class="f-soc" title="YouTube"><svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="rgba(90,122,154,.6)" stroke="none"/></svg></div>
+      </div>
+    </div>
+    <div>
+      <p class="f-col-h">Shop</p>
+      <div class="f-links">
+        <a href="#buy" onclick="addToCart()">Robot Window Cleaner</a>
+        <a href="#features">Features</a>
+        <a href="#specs">Specifications</a>
+        <a href="#reviews">Reviews</a>
+      </div>
+    </div>
+    <div>
+      <p class="f-col-h">Support</p>
+      <div class="f-links">
+        <a href="#faq">FAQ</a>
+        <a href="#">Track My Order</a>
+        <a href="#">Contact Us</a>
+        <a href="#">Care Guide</a>
+      </div>
+    </div>
+    <div>
+      <p class="f-col-h">Policies</p>
+      <div class="f-links">
+        <a href="#">Shipping Policy</a>
+        <a href="#">Returns & Refunds</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+  <hr class="footer-divider">
+  <div class="footer-bottom">
+    <span class="f-copy">© 2026 WashItRight. All rights reserved. Powered by Shopify.</span>
+    <div class="f-pay-badges">
+      <span class="f-pay-badge">VISA</span>
+      <span class="f-pay-badge">Mastercard</span>
+      <span class="f-pay-badge">AMEX</span>
+      <span class="f-pay-badge">PayPal</span>
+      <span class="f-pay-badge">Apple Pay</span>
+      <span class="f-pay-badge">Shop Pay</span>
+    </div>
+    <span class="f-shopify">Made with ♥ for WashItRight</span>
+  </div>
+</footer>
+
+<!-- ═══ CART DRAWER ═══ -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-h">
+    <h3>Your Cart</h3>
+    <div class="drawer-close" onclick="closeCart()">✕</div>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+    <div class="cart-empty" id="cartEmpty">
+      <div class="cart-empty-icon">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      </div>
+      <p>Your cart is empty</p>
+      <button class="btn-primary" style="margin:0 auto" onclick="closeCart();document.getElementById('buy').scrollIntoView({behavior:'smooth'})">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Shop Now
+      </button>
+    </div>
+    <div id="cartItems"></div>
+  </div>
+  <div class="drawer-foot" id="drawerFoot" style="display:none">
+    <div class="cart-total-row">
+      <span>Subtotal</span>
+      <strong id="cartTotal">Dhs. 0</strong>
+    </div>
+    <div class="cart-free-shipping">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Free worldwide shipping included
+    </div>
+    <button class="btn-primary" style="width:100%;margin-bottom:10px;justify-content:center" onclick="showToast('Redirecting to secure checkout…');closeCart()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Checkout Securely
+    </button>
+    <button class="btn-secondary" style="width:100%;justify-content:center" onclick="closeCart()">Continue Shopping</button>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Item added to cart</span>
+</div>
+
+<!-- ═══ BACK TO TOP ═══ -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+/* ─ Cart State ─ */
+var cartItems = [];
+
+function addToCart(){
+  var existing = cartItems.find(i=>i.id==='robot-cleaner');
+  if(existing){existing.qty++}
+  else{cartItems.push({id:'robot-cleaner',name:'Advanced Robot Window Cleaner',price:522,qty:1,img:'https://washitright.net/cdn/shop/files/S6e303ed0adc7468f8a355412f77be94eA.webp?v=1782593582&width=200'})}
+  renderCart();
+  showToast('Added to cart — Robot Window Cleaner 🎉');
+  openCart();
+}
+
+function renderCart(){
+  var total=0,count=0;
+  var items=document.getElementById('cartItems');
+  items.innerHTML='';
+  cartItems.forEach((item,i)=>{
+    total+=item.price*item.qty;count+=item.qty;
+    items.innerHTML+=`<div class="cart-item-d">
+      <img src="${item.img}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&auto=format&fit=crop'">
+      <div class="ci-info">
+        <div class="ci-name">${item.name}</div>
+        <div class="ci-meta">In Stock · Ships in 24h</div>
+        <div class="ci-row">
+          <div class="ci-qty">
+            <button onclick="changeQty(${i},-1)">−</button>
+            <span>${item.qty}</span>
+            <button onclick="changeQty(${i},1)">+</button>
+          </div>
+          <div class="ci-price">Dhs. ${(item.price*item.qty).toFixed(0)}</div>
+        </div>
+        <div class="ci-remove" onclick="removeItem(${i})">Remove</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('cartEmpty').style.display=cartItems.length?'none':'block';
+  document.getElementById('drawerFoot').style.display=cartItems.length?'block':'none';
+  document.getElementById('cartTotal').textContent='Dhs. '+total.toFixed(0);
+  document.getElementById('cartCount').textContent=count;
+}
+
+function changeQty(i,d){
+  cartItems[i].qty=Math.max(1,cartItems[i].qty+d);
+  renderCart();
+}
+function removeItem(i){
+  cartItems.splice(i,1);
+  renderCart();
+}
+function openCart(){
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeCart(){
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ─ Mobile Nav ─ */
+function openMobileNav(){document.getElementById('mobileNav').classList.add('open');document.body.style.overflow='hidden'}
+function closeMobileNav(){document.getElementById('mobileNav').classList.remove('open');document.body.style.overflow=''}
+
+/* ─ Toast ─ */
+function showToast(msg){
+  var t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* ─ FAQ ─ */
+function toggleFaq(head){
+  var item=head.parentElement;
+  document.querySelectorAll('.faq-item').forEach(i=>{if(i!==item)i.classList.remove('open')});
+  item.classList.toggle('open');
+}
+
+/* ─ Newsletter ─ */
+function subscribeNewsletter(){
+  var v=document.getElementById('nlEmail').value;
+  if(!v.includes('@')){showToast('Please enter a valid email address');return}
+  showToast('Subscribed! Welcome to WashItRight 🎉');
+  document.getElementById('nlEmail').value='';
+}
+
+/* ─ Back to Top ─ */
+window.addEventListener('scroll',()=>{
+  document.getElementById('backTop').classList.toggle('show',window.scrollY>500);
+});
+
+/* ─ Counter Animation ─ */
+function animateCounters(){
+  document.querySelectorAll('[data-target]').forEach(el=>{
+    var target=parseInt(el.dataset.target);
+    var start=0,duration=2000,step=target/duration*16;
+    var interval=setInterval(()=>{
+      start=Math.min(start+step,target);
+      el.textContent=Math.floor(start).toLocaleString()+'+';
+      if(start>=target)clearInterval(interval);
+    },16);
+  });
+}
+var counterDone=false;
+var observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting&&!counterDone){animateCounters();counterDone=true}});
+},{threshold:.3});
+var statsEl=document.querySelector('.stats-bar');
+if(statsEl)observer.observe(statsEl);
+
+/* ─ Keyboard ─ */
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCart();closeMobileNav()}});
+
+/* ─ Smooth scroll for nav links ─ */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    var target=document.querySelector(a.getAttribute('href'));
+    if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth',block:'start'})}
+  });
+});
+</script>
+</body>
+</html>
